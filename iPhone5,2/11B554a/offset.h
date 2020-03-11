@@ -48,11 +48,16 @@
 #define bcopy_ADDR              (0x341D8)
 #define decompress_lzss_ADDR    (0x257E0 + 1)
 
+#define get_current_task_ADDR       (0x21064)
+#define go_command_handler_ADDR     (0x41E88)
+#define verify_shsh_ADDR            (0x1AD14)
+#define nettoyeur_uncompressed_ADDR (0x48000)
+#define nettoyeur compressed_ADDR   (0x47a7c)
+
 #define NODE_SIZE (4096 * 4) /* XXX a size this large will use cache for catalog blocks */
 #define TOTAL_NODES (0xFFF)
 #define ROOT_NODE (0xFFFFFF / NODE_SIZE - 1)
 #define EXTENT_SIZE ((unsigned long long)NODE_SIZE * (unsigned long long)TOTAL_NODES)
-
 
 #define TREEDEPTH 1
 #define TRYFIRST 0
@@ -111,7 +116,7 @@ void patch_extents(void **buffer, void *nettoyeur, size_t nettoyeur_sz){
     PUT_WORD_LE(buffer,  0x47BB0 +  36 - 0x47B54, INSNT_LDR_R_PC(0, 64));
     PUT_WORD_LE(buffer,  0x47BB0 +  38 - 0x47B54, INSNT_LDR_R_PC(1, 68));
     PUT_WORD_LE(buffer,  0x47BB0 +  40 - 0x47B54, INSNT_STR_R1_R4_R0);
-    PUT_DWORD_LE(buffer, 0x47BB0 +  42 - 0x47B54, make_bl(0, 0x47BB0 + 42, 0x21064));
+    PUT_DWORD_LE(buffer, 0x47BB0 +  42 - 0x47B54, make_bl(0, 0x47BB0 + 42, get_current_task_ADDR));
     PUT_WORD_LE(buffer,  0x47BB0 +  46 - 0x47B54, INSNT_MOV_R_I(1, 0));
     PUT_WORD_LE(buffer,  0x47BB0 +  48 - 0x47B54, INSNT_STR_R1_R0_68);
     PUT_WORD_LE(buffer,  0x47BB0 +  50 - 0x47B54, INSNT_LDR_R_PC(0, 60));
@@ -130,10 +135,10 @@ void patch_extents(void **buffer, void *nettoyeur, size_t nettoyeur_sz){
     PUT_DWORD_LE(buffer, 0x47BB0 +  88 - 0x47B54, IMAGE_JUMPADDR);
     PUT_DWORD_LE(buffer, 0x47BB0 +  92 - 0x47B54, IMAGE_START);
     PUT_DWORD_LE(buffer, 0x47BB0 +  96 - 0x47B54, IMAGE_BSS_START - IMAGE_START);
-    PUT_DWORD_LE(buffer, 0x47BB0 + 100 - 0x47B54, 0x41E88 /* go command handler */);
-    PUT_DWORD_LE(buffer, 0x47BB0 + 104 - 0x47B54, 0x1AD14 /* allow unsigned images */);
+    PUT_DWORD_LE(buffer, 0x47BB0 + 100 - 0x47B54, go_command_handler_ADDR /* go command handler */);
+    PUT_DWORD_LE(buffer, 0x47BB0 + 104 - 0x47B54, verify_shsh_ADDR /* allow unsigned images */);
     PUT_DWORD_LE(buffer, 0x47BB0 + 108 - 0x47B54, INSN2_MOV_R0_0__STR_R0_R3 /* allow unsigned images */);
-    PUT_DWORD_LE(buffer, 0x47BB0 + 112 - 0x47B54, IMAGE_START + 0x48000 /* nettoyeur uncompressed */);
-    PUT_DWORD_LE(buffer, 0x47BB0 + 116 - 0x47B54, IMAGE_START + 0x47a7c /* nettoyeur compressed */);
+    PUT_DWORD_LE(buffer, 0x47BB0 + 112 - 0x47B54, IMAGE_START + nettoyeur_uncompressed_ADDR /* nettoyeur uncompressed */);
+    PUT_DWORD_LE(buffer, 0x47BB0 + 116 - 0x47B54, IMAGE_START + nettoyeur_compressed_ADDR /* nettoyeur compressed */);
     PUT_DWORD_LE(buffer, 0x47BB0 + 120 - 0x47B54, IMAGE_START + wtf_ADDR);
 }
